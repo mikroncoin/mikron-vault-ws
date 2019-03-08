@@ -105,6 +105,14 @@ wss.on('connection', function(ws) {
   });
 });
 
+wss.on('listening', function(ws) {
+  console.log(`Websocket server listening on ` + wss.address().address + ':' + wss.address().port + ' (' + wss.address().family + ')');
+});
+
+wss.on('error', function(ws, error) {
+  console.log(`ERROR ` + error);
+});
+
 async function saveHashTimestamp(hash) {
   console.log(`Saving block timestamp: `, hash);
   const d = new Date();
@@ -140,6 +148,7 @@ function subscribeAccounts(ws, accounts) {
     }
 
     subscriptionMap[account].push(ws);
+    //console.log(`Subscribed: ${account} ${subscriptionMap[account].length} ${Object.keys(subscriptionMap).length}`)
   });
 }
 function unsubscribeAccounts(ws, accounts) {
@@ -163,12 +172,13 @@ function unsubscribeAccounts(ws, accounts) {
 }
 
 function printStats() {
-  const connectedClients = wss.clients.length;
+  const connectedClients = wss.clients.keys.length;
+  const subscribedAccounts = Object.keys(subscriptionMap).length;
   const tps = tpsCount / statTime;
-  console.log(`[Stats] Connected clients: ${connectedClients}; TPS Average: ${tps}`);
+  console.log(`[Stats] Connected clients: ${subscribedAccounts} ${connectedClients}; TPS Average: ${tps}`);
   tpsCount = 0;
 }
 
 setInterval(printStats, statTime * 1000); // Print stats every x seconds
 
-console.log(`Websocket server online!`);
+console.log(`Websocket server starting`);
